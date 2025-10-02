@@ -1,10 +1,11 @@
-const CACHE_NAME = 'silent-tournaments-v1.0.1';
+const CACHE_NAME = 'silent-tournaments-v2.0.0';
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
   '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/icons/icon-512x512.png',
+  'https://silentgaminghub8-web.github.io/github.io/'
 ];
 
 // Install event
@@ -15,6 +16,7 @@ self.addEventListener('install', function(event) {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -45,6 +47,6 @@ self.addEventListener('activate', function(event) {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
