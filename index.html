@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Silent Tournaments</title>
     
     <!-- PWA Meta Tags -->
@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-title" content="Silent Tournaments">
     <meta name="description" content="Your ultimate gaming tournament platform">
     
-    <!-- iOS Icons - CRITICAL FIX -->
+    <!-- iOS Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="https://ik.imagekit.io/silentgamers/Picsart_25-09-20_09-43-31-711.png?updatedAt=1758341648411">
     <link rel="apple-touch-icon" sizes="167x167" href="https://ik.imagekit.io/silentgamers/Picsart_25-09-20_09-43-31-711.png?updatedAt=1758341648411">
     <link rel="apple-touch-icon" sizes="152x152" href="https://ik.imagekit.io/silentgamers/Picsart_25-09-20_09-43-31-711.png?updatedAt=1758341648411">
@@ -29,6 +29,16 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        html {
+            scroll-behavior: auto !important;
         }
         
         body {
@@ -40,6 +50,38 @@
             width: 100vw;
             position: fixed;
             touch-action: manipulation;
+        }
+        
+        /* Force portrait orientation */
+        @media (orientation: landscape) {
+            html, body {
+                transform: rotate(-90deg);
+                transform-origin: left top;
+                width: 100vh;
+                height: 100vw;
+                overflow-x: hidden;
+                position: absolute;
+                top: 100%;
+                left: 0;
+            }
+            
+            #content-container {
+                width: 100vh !important;
+                height: 100vw !important;
+            }
+            
+            #loading-screen {
+                width: 100vh;
+                height: 100vw;
+            }
+            
+            #install-prompt, #platform-instructions {
+                transform: translate(-50%, -50%) rotate(90deg);
+            }
+            
+            #direct-install {
+                transform: rotate(90deg);
+            }
         }
         
         /* Loading Screen Styles */
@@ -396,6 +438,55 @@
     <button id="direct-install">📱 Install App</button> 
 
     <script>
+        // Force portrait orientation
+        function lockOrientation() {
+            // Try to lock orientation to portrait
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('portrait').catch(function(error) {
+                    console.log('Orientation lock failed: ', error);
+                });
+            }
+            
+            // Alternative method for older browsers
+            if (screen.lockOrientation) {
+                screen.lockOrientation('portrait');
+            } else if (screen.mozLockOrientation) {
+                screen.mozLockOrientation('portrait');
+            } else if (screen.msLockOrientation) {
+                screen.msLockOrientation('portrait');
+            }
+        }
+
+        // Apply orientation lock when app loads
+        window.addEventListener('load', function() {
+            setTimeout(lockOrientation, 1000);
+        });
+
+        // Re-apply orientation lock when app becomes visible
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                setTimeout(lockOrientation, 500);
+            }
+        });
+
+        // Lock orientation when returning from background
+        window.addEventListener('focus', lockOrientation);
+
+        // Detect and handle landscape mode
+        function handleOrientation() {
+            const isLandscape = window.innerWidth > window.innerHeight;
+            
+            if (isLandscape) {
+                console.log('Landscape mode detected, applying portrait fix');
+                // The CSS will handle the rotation
+            }
+        }
+
+        // Check orientation on load and resize
+        window.addEventListener('load', handleOrientation);
+        window.addEventListener('resize', handleOrientation);
+        window.addEventListener('orientationchange', handleOrientation);
+
         // PWA Installation
         let deferredPrompt;
         const installPrompt = document.getElementById('install-prompt');
