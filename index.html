@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Silent Tournaments</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#ff8c00">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Silent Tournaments">
+    <meta name="description" content="Your ultimate gaming tournament platform">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #000;
+            color: #ff8c00;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            touch-action: manipulation;
+        }
+        
+        /* Loading Screen Styles */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 140, 0, 0.7);
+            letter-spacing: 2px;
+        }
+        
+        .loading-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            color: #ffa64d;
+            text-align: center;
+        }
+        
+        .loading-container {
+            width: 80%;
+            max-width: 400px;
+            background-color: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.3);
+        }
+        
+        .loading-bar {
+            height: 20px;
+            width: 0%;
+            background: linear-gradient(90deg, #ff8c00 0%, #ffa64d 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+        
+        .loading-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .loading-percentage {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        .loading-gaming-icons {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 20px;
+        }
+        
+        .gaming-icon {
+            font-size: 2rem;
+            animation: pulse 1.5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+        
+        /* Content Container Styles */
+        #content-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+            z-index: 1;
+        }
+        
+        /* Hide loading screen */
+        .loaded #loading-screen {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loaded #content-container {
+            display: block;
+        }
+        
+        /* Install Prompt Styles */
+        #install-prompt {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border: 2px solid #ff8c00;
+            border-radius: 15px;
+            padding: 2rem;
+            z-index: 10000;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 140, 0, 0.5);
+            max-width: 90%;
+            width: 400px;
+            display: none;
+        }
+        
+        #install-prompt.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        .install-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 15px;
+            margin: 0 auto 1rem;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ff8c00;
+        }
+        
+        .install-icon img {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+        }
+        
+        .install-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #ff8c00;
+        }
+        
+        .install-description {
+            color: #ffa64d;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+        
+        .install-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        .install-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .install-btn.primary {
+            background: linear-gradient(135deg, #ff8c00 0%, #ffa64d 100%);
+            color: #000;
+        }
+        
+        .install-btn.secondary {
+            background: transparent;
+            color: #ff8c00;
+            border: 2px solid #ff8c00;
+        }
+        
+        .install-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3);
+        }
+        
+        .close-prompt {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #ff8c00;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-prompt:hover {
+            background: rgba(255, 140, 0, 0.1);
+        }
+        
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            display: none;
+        }
+        
+        #overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <h1 class="loading-title">SILENT TOURNAMENTS</h1>
+        <p class="loading-subtitle">Loading your ultimate gaming experience...</p>
+        
+        <div class="loading-container">
+            <div class="loading-bar" id="loading-bar"></div>
+        </div>
+        <div class="loading-percentage" id="loading-percentage">0%</div>
+        
+        <div class="loading-gaming-icons">
+        </div>
+    </div>
+    
+    <!-- Content Container -->
+    <iframe id="content-container" src="https://silentgaminghub8-web.github.io/github.io/" frameborder="0"></iframe>
+    
+    <!-- Install Prompt -->
+    <div id="overlay"></div>
+    <div id="install-prompt">
+        <button class="close-prompt" id="close-prompt">&times;</button>
+        <div class="install-icon">
+            <img src="icons/icon-192x192.png" alt="Silent Tournaments Icon">
+        </div>
+        <h2 class="install-title">Install Silent Tournaments</h2>
+        <p class="install-description">Install our app for a better gaming experience with faster loading and offline capabilities.</p>
+        <div class="install-buttons">
+            <button class="install-btn primary" id="install-button">Install Now</button>
+            <button class="install-btn secondary" id="later-button">Maybe Later</button>
+        </div>
+    </div>
+
+    <script>
+        // PWA Installation
+        let deferredPrompt;
+        const installPrompt = document.getElementById('install-prompt');
+        const overlay = document.getElementById('overlay');
+        const installButton = document.getElementById('install-button');
+        const laterButton = document.getElementById('later-button');
+        const closePrompt = document.getElementById('close-prompt');
+        
+        // Check if app is already installed
+        function isAppInstalled() {
+            return window.matchMedia('(display-mode: standalone)').matches || 
+                   window.navigator.standalone === true;
+        }
+        
+        // Show install prompt
+        function showInstallPrompt() {
+            if (!isAppInstalled() && deferredPrompt) {
+                installPrompt.classList.add('show');
+                overlay.classList.add('show');
+            }
+        }
+        
+        // Hide install prompt
+        function hideInstallPrompt() {
+            installPrompt.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+        
+        // Event listener for beforeinstallprompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show prompt after loading
+            setTimeout(showInstallPrompt, 3000);
+        });
+        
+        // Install button click
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                }
+                deferredPrompt = null;
+                hideInstallPrompt();
+            }
+        });
+        
+        // Later and close buttons
+        laterButton.addEventListener('click', hideInstallPrompt);
+        closePrompt.addEventListener('click', hideInstallPrompt);
+        overlay.addEventListener('click', hideInstallPrompt);
+        
+        // Check if app is successfully installed
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            console.log('PWA was installed');
+            hideInstallPrompt();
+        });
+
+        // Simulate loading progress
+        let progress = 0;
+        const loadingBar = document.getElementById('loading-bar');
+        const loadingPercentage = document.getElementById('loading-percentage');
+        const contentContainer = document.getElementById('content-container');
+        
+        const simulateLoading = () => {
+            const interval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    // Show content after a short delay
+                    setTimeout(() => {
+                        document.body.classList.add('loaded');
+                    }, 500);
+                }
+                
+                loadingBar.style.width = `${progress}%`;
+                loadingPercentage.textContent = `${Math.round(progress)}%`;
+            }, 200);
+        };
+        
+        // Start loading simulation when page loads
+        window.addEventListener('load', simulateLoading);
+        
+        // Prevent zooming and other default gestures
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('gesturechange', function(e) {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('gestureend', function(e) {
+            e.preventDefault();
+        });
+        
+        // Prevent context menu on long press
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+        
+        // Ensure content iframe loads properly
+        contentContainer.addEventListener('load', function() {
+            console.log('Content loaded successfully');
+        });
+        
+        // Handle iframe loading errors
+        contentContainer.addEventListener('error', function() {
+            console.error('Failed to load content');
+        });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
