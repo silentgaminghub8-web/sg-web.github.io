@@ -12,11 +12,11 @@
     <meta name="apple-mobile-web-app-title" content="Silent Tournaments">
     <meta name="description" content="Your ultimate gaming tournament platform">
     
-    <!-- iOS Icons -->
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <!-- iOS Icons - CRITICAL FIX -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167x167.png">
     <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192x192.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120x120.png">
     
     <!-- Standard Icons -->
     <link rel="icon" type="image/png" href="icons/icon-192x192.png">
@@ -279,25 +279,70 @@
             display: block;
         }
 
-        /* Manual Install Button */
-        #manual-install {
+        /* Direct Install Button */
+        #direct-install {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: #ff8c00;
+            background: linear-gradient(135deg, #ff8c00 0%, #ffa64d 100%);
             color: #000;
             border: none;
             border-radius: 50px;
-            padding: 12px 20px;
+            padding: 12px 24px;
             font-weight: bold;
             cursor: pointer;
             z-index: 1000;
             box-shadow: 0 4px 15px rgba(255, 140, 0, 0.4);
             display: none;
+            font-size: 14px;
         }
         
-        #manual-install.show {
+        #direct-install.show {
             display: block;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+
+        /* Platform Specific Instructions */
+        #platform-instructions {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border: 2px solid #ff8c00;
+            border-radius: 15px;
+            padding: 2rem;
+            z-index: 10001;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 140, 0, 0.5);
+            max-width: 90%;
+            width: 400px;
+            display: none;
+        }
+        
+        #platform-instructions.show {
+            display: block;
+        }
+        
+        .instructions-content {
+            color: #ffa64d;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        
+        .instructions-content ol {
+            padding-left: 1.5rem;
+        }
+        
+        .instructions-content li {
+            margin-bottom: 0.5rem;
         }
     </style>
 </head>
@@ -334,8 +379,21 @@
         </div>
     </div>
 
-    <!-- Manual Install Button -->
-    <button id="manual-install">Install App</button>
+    <!-- Platform Instructions -->
+    <div id="platform-instructions">
+        <button class="close-prompt" id="close-instructions">&times;</button>
+        <div class="install-icon">
+            <img src="icons/icon-192x192.png" alt="Silent Tournaments Icon">
+        </div>
+        <h2 class="install-title">Install App</h2>
+        <div class="instructions-content" id="instructions-content">
+            <!-- Content will be filled by JavaScript -->
+        </div>
+        <button class="install-btn primary" id="got-it-button">Got It</button>
+    </div>
+
+    <!-- Direct Install Button -->
+    <button id="direct-install">📱 Install App</button>
 
     <script>
         // PWA Installation
@@ -345,7 +403,24 @@
         const installButton = document.getElementById('install-button');
         const laterButton = document.getElementById('later-button');
         const closePrompt = document.getElementById('close-prompt');
-        const manualInstall = document.getElementById('manual-install');
+        const directInstall = document.getElementById('direct-install');
+        const platformInstructions = document.getElementById('platform-instructions');
+        const instructionsContent = document.getElementById('instructions-content');
+        const closeInstructions = document.getElementById('close-instructions');
+        const gotItButton = document.getElementById('got-it-button');
+        
+        // Detect platform
+        function getPlatform() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
+            if (/android/i.test(userAgent)) {
+                return 'android';
+            }
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                return 'ios';
+            }
+            return 'other';
+        }
         
         // Check if app is already installed
         function isAppInstalled() {
@@ -367,11 +442,56 @@
             overlay.classList.remove('show');
         }
         
-        // Show manual install button for Android
-        function showManualInstall() {
+        // Show direct install button
+        function showDirectInstall() {
             if (!isAppInstalled()) {
-                manualInstall.classList.add('show');
+                directInstall.classList.add('show');
             }
+        }
+        
+        // Show platform-specific instructions
+        function showInstructions() {
+            const platform = getPlatform();
+            let instructions = '';
+            
+            if (platform === 'android') {
+                instructions = `
+                    <p>To install Silent Tournaments on Android:</p>
+                    <ol>
+                        <li>Tap the menu button (⋮) in Chrome</li>
+                        <li>Select "Add to Home screen"</li>
+                        <li>Tap "Add" to install</li>
+                    </ol>
+                    <p><strong>Note:</strong> Some Android browsers may show "Install" button directly.</p>
+                `;
+            } else if (platform === 'ios') {
+                instructions = `
+                    <p>To install Silent Tournaments on iOS:</p>
+                    <ol>
+                        <li>Tap the Share button (📤) in Safari</li>
+                        <li>Scroll down and tap "Add to Home Screen"</li>
+                        <li>Tap "Add" in the top right corner</li>
+                    </ol>
+                `;
+            } else {
+                instructions = `
+                    <p>To install this app:</p>
+                    <ol>
+                        <li>Look for the install button in your browser's address bar</li>
+                        <li>Or check the browser menu for "Install" or "Add to Home Screen"</li>
+                    </ol>
+                `;
+            }
+            
+            instructionsContent.innerHTML = instructions;
+            platformInstructions.classList.add('show');
+            overlay.classList.add('show');
+        }
+        
+        // Hide instructions
+        function hideInstructions() {
+            platformInstructions.classList.remove('show');
+            overlay.classList.remove('show');
         }
         
         // Event listener for beforeinstallprompt
@@ -380,52 +500,75 @@
             deferredPrompt = e;
             console.log('Before install prompt fired');
             
+            // Show direct install button for Android
+            if (getPlatform() === 'android') {
+                showDirectInstall();
+            }
+            
             // Show prompt after loading
             setTimeout(showInstallPrompt, 3000);
         });
         
-        // If no install prompt after 5 seconds, show manual button
+        // If no install prompt after 3 seconds, show appropriate button
         setTimeout(() => {
-            if (!deferredPrompt && !isAppInstalled()) {
-                showManualInstall();
+            if (!isAppInstalled()) {
+                const platform = getPlatform();
+                if (platform === 'android' && !deferredPrompt) {
+                    showDirectInstall();
+                } else if (platform === 'ios') {
+                    showDirectInstall();
+                }
             }
-        }, 5000);
+        }, 3000);
         
-        // Install button click
+        // Install button click - DIRECT INSTALL
         installButton.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') {
                     console.log('User accepted the install prompt');
+                    hideInstallPrompt();
+                    directInstall.classList.remove('show');
                 }
                 deferredPrompt = null;
-                hideInstallPrompt();
-                manualInstall.classList.remove('show');
+            } else {
+                // Fallback to instructions
+                showInstructions();
             }
         });
         
-        // Manual install button
-        manualInstall.addEventListener('click', () => {
+        // Direct install button click
+        directInstall.addEventListener('click', () => {
             if (deferredPrompt) {
+                // Direct install for Android
                 deferredPrompt.prompt();
             } else {
-                // Show instructions for manual installation
-                alert('To install this app:\n\n1. Tap the menu button (⋮)\n2. Tap "Add to Home screen"\n3. Tap "Add"');
+                // Show platform-specific instructions
+                showInstructions();
             }
         });
         
         // Later and close buttons
         laterButton.addEventListener('click', hideInstallPrompt);
         closePrompt.addEventListener('click', hideInstallPrompt);
-        overlay.addEventListener('click', hideInstallPrompt);
+        closeInstructions.addEventListener('click', hideInstructions);
+        gotItButton.addEventListener('click', hideInstructions);
+        overlay.addEventListener('click', () => {
+            hideInstallPrompt();
+            hideInstructions();
+        });
         
         // Check if app is successfully installed
         window.addEventListener('appinstalled', () => {
             deferredPrompt = null;
             console.log('PWA was installed');
             hideInstallPrompt();
-            manualInstall.classList.remove('show');
+            hideInstructions();
+            directInstall.classList.remove('show');
+            
+            // Show success message
+            alert('Silent Tournaments has been installed successfully!');
         });
 
         // Simulate loading progress
@@ -493,6 +636,15 @@
                     .catch(function(error) {
                         console.log('ServiceWorker registration failed: ', error);
                     });
+            });
+        }
+
+        // Force service worker update
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.update();
+                }
             });
         }
     </script>
