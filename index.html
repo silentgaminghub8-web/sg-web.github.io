@@ -13,13 +13,13 @@
     <meta name="description" content="Your ultimate gaming tournament platform">
     
     <!-- iOS Icons - CRITICAL FIX -->
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167x167.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://ik.imagekit.io/silentgamers/Picsart_25-09-20_09-43-31-711.png?updatedAt=1758341648411">
+    <link rel="apple-touch-icon" sizes="167x167" href="https://ik.imagekit.io/silentgamers/Picsart_25-09-20_09-43-31-711.png?updatedAt=1758341648411">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://ik.imagekit.io/silentgamers/Picsart_25-09-20_09-43-31-711.png?updatedAt=1758341648411">
+    <link rel="apple-touch-icon" sizes="120x120" href="https://ik.imagekit.io/silentgamers/Picsart_25-09-20_09-43-31-711.png?updatedAt=1758341648411">
     
     <!-- Standard Icons -->
-    <link rel="icon" type="image/png" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" href="https://ik.imagekit.io/silentgamers/Picsart_25-09-20_09-43-31-711.png?updatedAt=1758341648411">
     
     <!-- Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -277,7 +277,7 @@
         
         #overlay.show {
             display: block;
-        }
+        } 
 
         /* Direct Install Button */
         #direct-install {
@@ -306,7 +306,7 @@
             0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
             40% {transform: translateY(-10px);}
             60% {transform: translateY(-5px);}
-        }
+        } 
 
         /* Platform Specific Instructions */
         #platform-instructions {
@@ -369,7 +369,7 @@
     <div id="install-prompt">
         <button class="close-prompt" id="close-prompt">&times;</button>
         <div class="install-icon">
-            <img src="icons/icon-192x192.png" alt="Silent Tournaments Icon">
+            <img src="https://ik.imagekit.io/silentgamers/Picsart_25-09-20_09-43-31-711.png?updatedAt=1758341648411" alt="Silent Tournaments Icon">
         </div>
         <h2 class="install-title">Install Silent Tournaments</h2>
         <p class="install-description">Install our app for a better gaming experience with faster loading and offline capabilities.</p>
@@ -377,23 +377,23 @@
             <button class="install-btn primary" id="install-button">Install Now</button>
             <button class="install-btn secondary" id="later-button">Maybe Later</button>
         </div>
-    </div>
+    </div> 
 
     <!-- Platform Instructions -->
     <div id="platform-instructions">
         <button class="close-prompt" id="close-instructions">&times;</button>
         <div class="install-icon">
-            <img src="icons/icon-192x192.png" alt="Silent Tournaments Icon">
+            <img src="https://ik.imagekit.io/silentgamers/Picsart_25-09-20_09-43-31-711.png?updatedAt=1758341648411" alt="Silent Tournaments Icon">
         </div>
         <h2 class="install-title">Install App</h2>
         <div class="instructions-content" id="instructions-content">
             <!-- Content will be filled by JavaScript -->
         </div>
         <button class="install-btn primary" id="got-it-button">Got It</button>
-    </div>
+    </div> 
 
     <!-- Direct Install Button -->
-    <button id="direct-install">📱 Install App</button>
+    <button id="direct-install">📱 Install App</button> 
 
     <script>
         // PWA Installation
@@ -569,7 +569,7 @@
             
             // Show success message
             alert('Silent Tournaments has been installed successfully!');
-        });
+        }); 
 
         // Simulate loading progress
         let progress = 0;
@@ -624,7 +624,7 @@
         // Handle iframe loading errors
         contentContainer.addEventListener('error', function() {
             console.error('Failed to load content');
-        });
+        }); 
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
@@ -637,7 +637,7 @@
                         console.log('ServiceWorker registration failed: ', error);
                     });
             });
-        }
+        } 
 
         // Force service worker update
         if ('serviceWorker' in navigator) {
@@ -647,6 +647,23 @@
                 }
             });
         }
+
+        // Enhanced install button visibility
+        window.addEventListener('load', function() {
+            // Check if PWA is already installed
+            if (isAppInstalled()) {
+                console.log('App is already installed');
+                return;
+            }
+
+            // Show install button for supported platforms
+            const platform = getPlatform();
+            if (platform === 'ios' || (platform === 'android' && !deferredPrompt)) {
+                setTimeout(() => {
+                    showDirectInstall();
+                }, 5000);
+            }
+        });
     </script>
 </body>
 </html>
