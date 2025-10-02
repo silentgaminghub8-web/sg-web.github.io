@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Silent Tournaments</title>
@@ -12,9 +12,14 @@
     <meta name="apple-mobile-web-app-title" content="Silent Tournaments">
     <meta name="description" content="Your ultimate gaming tournament platform">
     
-    <!-- Icons -->
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-192x192.png">
+    
+    <!-- Standard Icons -->
     <link rel="icon" type="image/png" href="icons/icon-192x192.png">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     
     <!-- Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -273,6 +278,27 @@
         #overlay.show {
             display: block;
         }
+
+        /* Manual Install Button */
+        #manual-install {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #ff8c00;
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.4);
+            display: none;
+        }
+        
+        #manual-install.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -308,6 +334,9 @@
         </div>
     </div>
 
+    <!-- Manual Install Button -->
+    <button id="manual-install">Install App</button>
+
     <script>
         // PWA Installation
         let deferredPrompt;
@@ -316,6 +345,7 @@
         const installButton = document.getElementById('install-button');
         const laterButton = document.getElementById('later-button');
         const closePrompt = document.getElementById('close-prompt');
+        const manualInstall = document.getElementById('manual-install');
         
         // Check if app is already installed
         function isAppInstalled() {
@@ -337,14 +367,29 @@
             overlay.classList.remove('show');
         }
         
+        // Show manual install button for Android
+        function showManualInstall() {
+            if (!isAppInstalled()) {
+                manualInstall.classList.add('show');
+            }
+        }
+        
         // Event listener for beforeinstallprompt
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
+            console.log('Before install prompt fired');
             
             // Show prompt after loading
             setTimeout(showInstallPrompt, 3000);
         });
+        
+        // If no install prompt after 5 seconds, show manual button
+        setTimeout(() => {
+            if (!deferredPrompt && !isAppInstalled()) {
+                showManualInstall();
+            }
+        }, 5000);
         
         // Install button click
         installButton.addEventListener('click', async () => {
@@ -356,6 +401,17 @@
                 }
                 deferredPrompt = null;
                 hideInstallPrompt();
+                manualInstall.classList.remove('show');
+            }
+        });
+        
+        // Manual install button
+        manualInstall.addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+            } else {
+                // Show instructions for manual installation
+                alert('To install this app:\n\n1. Tap the menu button (⋮)\n2. Tap "Add to Home screen"\n3. Tap "Add"');
             }
         });
         
@@ -369,6 +425,7 @@
             deferredPrompt = null;
             console.log('PWA was installed');
             hideInstallPrompt();
+            manualInstall.classList.remove('show');
         });
 
         // Simulate loading progress
@@ -429,7 +486,7 @@
         // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('sw.js')
                     .then(function(registration) {
                         console.log('ServiceWorker registration successful with scope: ', registration.scope);
                     })
