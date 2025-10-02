@@ -2,7 +2,7 @@
   "name": "Silent Tournaments",
   "short_name": "SilentTournaments",
   "description": "Your ultimate gaming tournament platform",
-  "start_url": "/",
+  "start_url": "https://silentgaminghub8-web.github.io/sg-web.github.io/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#ff8c00",
